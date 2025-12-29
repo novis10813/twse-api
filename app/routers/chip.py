@@ -37,7 +37,7 @@ async def get_chip_summary(
     date: Optional[str] = Query(
         None,
         description="Date in YYYYMMDD format (default: today)",
-        regex=r"^\d{8}$"
+        pattern=r"^\d{8}$"
     )
 ):
     """
@@ -76,7 +76,7 @@ async def get_stock_chip_list(
     date: Optional[str] = Query(
         None,
         description="Date in YYYYMMDD format (default: today)",
-        regex=r"^\d{8}$"
+        pattern=r"^\d{8}$"
     )
 ):
     """
@@ -116,7 +116,7 @@ async def get_stock_chip_detail(
     date: Optional[str] = Query(
         None,
         description="Date in YYYYMMDD format (default: today)",
-        regex=r"^\d{8}$"
+        pattern=r"^\d{8}$"
     )
 ):
     """
