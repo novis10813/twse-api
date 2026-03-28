@@ -1,0 +1,49 @@
+# Development Docker Compose for twse-api
+# Uses local postgres (core-postgres 暫時關閉，待網路規劃完成後再遷移)
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up --build
+
+services:
+  twse-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: twse-api-dev
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    ports:
+      - "8020:8000"
+    volumes:
+      - ./app:/app/app:ro
+    depends_on:
+      twse-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  twse-postgres:
+    image: postgres:15-alpine
+    container_name: twse-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: twse_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - twse_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  twse_postgres_data:
