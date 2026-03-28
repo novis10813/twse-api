@@ -81,5 +81,5 @@ async def get_stock_margin_history(
     """個股融資融券歷史（從 DB 查，不補爬）"""
     try:
         return await get_margin_service(session).get_stock_margin_history(stock_id, start_date, end_date)
-    except Exception as e:
-        raise HTTPException(500, str(e))
+    except TWSEAPIError as e:
+        raise HTTPException(500, str(e.message))
