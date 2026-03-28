@@ -3,6 +3,7 @@ Chip Service — 三大法人資料 (DB-first cache).
 Parses TWSE T86 / BFI82U responses and maps to FinMind-compatible names.
 """
 import logging
+from datetime import date as date_type
 from typing import Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -46,7 +47,7 @@ class ChipService:
         raw = await self.client.fetch_chip_summary(date_str)
         db_rows = self._parse_bfi82u(date_str, raw)
         await self.repo.upsert_total_institutional(db_rows)
-        await self.session.commit()
+        await self.session.flush()
         rows = await self.repo.get_total_institutional(date_str)
         return self._format_chip_summary(date_str, rows)
 
@@ -60,7 +61,7 @@ class ChipService:
         raw = await self.client.fetch_stock_chip_data(date_str)
         db_rows = self._parse_t86(date_str, raw)
         await self.repo.upsert_stock_institutional(db_rows)
-        await self.session.commit()
+        await self.session.flush()
         rows = await self.repo.get_all_stocks_institutional(date_str)
         return self._format_stocks_chip(date_str, rows)
 
@@ -74,7 +75,7 @@ class ChipService:
         raw = await self.client.fetch_stock_chip_data(date_str)
         db_rows = self._parse_t86(date_str, raw)
         await self.repo.upsert_stock_institutional(db_rows)
-        await self.session.commit()
+        await self.session.flush()
         rows = await self.repo.get_stock_institutional(date_str, stock_id)
         if not rows:
             return None
@@ -84,7 +85,6 @@ class ChipService:
 
     def _parse_bfi82u(self, date_str: str, data: dict) -> list[dict]:
         """BFI82U → rows for twse_total_institutional_investors."""
-        from datetime import date as date_type
         d = date_type(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
         rows = []
         for row in data.get("data", []):
@@ -102,7 +102,6 @@ class ChipService:
 
     def _parse_t86(self, date_str: str, data: dict) -> list[dict]:
         """T86 → rows for twse_stock_institutional_investors."""
-        from datetime import date as date_type
         d = date_type(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
         rows = []
         for row in data.get("data", []):
