@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # Database settings
     postgres_user: str = "postgres"
-    postgres_password: SecretStr = "postgres"
+    postgres_password: SecretStr = SecretStr("postgres")
     postgres_host: str = "core-postgres"  # production: core-postgres; dev: set TWSE_POSTGRES_HOST=twse-postgres
     postgres_port: int = 5432
     postgres_db: str = "twse_db"
