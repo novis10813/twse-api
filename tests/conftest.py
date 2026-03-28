@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase
 
 
-class TestBase(DeclarativeBase):
+class SqliteBase(DeclarativeBase):
     pass
 
 
-class TestStockInstitutional(TestBase):
+class SqliteStockInstitutional(SqliteBase):
     __tablename__ = "twse_stock_institutional_investors"
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
@@ -24,7 +24,7 @@ class TestStockInstitutional(TestBase):
     __table_args__ = (UniqueConstraint("date", "stock_id", "name"),)
 
 
-class TestTotalInstitutional(TestBase):
+class SqliteTotalInstitutional(SqliteBase):
     __tablename__ = "twse_total_institutional_investors"
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
@@ -35,7 +35,7 @@ class TestTotalInstitutional(TestBase):
     __table_args__ = (UniqueConstraint("date", "name"),)
 
 
-class TestStockMargin(TestBase):
+class SqliteStockMargin(SqliteBase):
     __tablename__ = "twse_stock_margin"
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
@@ -57,7 +57,7 @@ class TestStockMargin(TestBase):
     __table_args__ = (UniqueConstraint("date", "stock_id"),)
 
 
-class TestTotalMargin(TestBase):
+class SqliteTotalMargin(SqliteBase):
     __tablename__ = "twse_total_margin"
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
@@ -76,7 +76,7 @@ async def test_session():
     """In-memory SQLite session for tests."""
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     async with engine.begin() as conn:
-        await conn.run_sync(TestBase.metadata.create_all)
+        await conn.run_sync(SqliteBase.metadata.create_all)
     session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with session_maker() as session:
         yield session

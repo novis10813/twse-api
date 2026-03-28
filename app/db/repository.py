@@ -43,8 +43,10 @@ class TWSERepository:
             )
             record = existing.scalar_one_or_none()
             if record:
-                record.buy = row.get("buy", 0)
-                record.sell = row.get("sell", 0)
+                if "buy" in row:
+                    record.buy = row["buy"]
+                if "sell" in row:
+                    record.sell = row["sell"]
             else:
                 self.session.add(StockInstitutionalInvestors(
                     date=d,
@@ -88,8 +90,10 @@ class TWSERepository:
             )
             record = existing.scalar_one_or_none()
             if record:
-                record.buy = row.get("buy", 0)
-                record.sell = row.get("sell", 0)
+                if "buy" in row:
+                    record.buy = row["buy"]
+                if "sell" in row:
+                    record.sell = row["sell"]
             else:
                 self.session.add(TotalInstitutionalInvestors(
                     date=d,

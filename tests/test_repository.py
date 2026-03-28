@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.repository import TWSERepository
-from tests.conftest import TestStockInstitutional, TestTotalInstitutional, TestStockMargin, TestTotalMargin
+from tests.conftest import SqliteStockInstitutional, SqliteTotalInstitutional, SqliteStockMargin, SqliteTotalMargin
 
 
 async def test_upsert_stock_institutional_inserts(test_session: AsyncSession):
@@ -14,7 +14,7 @@ async def test_upsert_stock_institutional_inserts(test_session: AsyncSession):
         {"date": date(2026, 3, 28), "stock_id": "2330", "name": "Foreign_Dealer", "buy": 1000, "sell": 500},
     ]
     await repo.upsert_stock_institutional(rows)
-    result = await test_session.execute(select(TestStockInstitutional))
+    result = await test_session.execute(select(SqliteStockInstitutional))
     records = result.scalars().all()
     assert len(records) == 1
     assert records[0].buy == 1000
@@ -26,7 +26,7 @@ async def test_upsert_stock_institutional_updates_on_conflict(test_session: Asyn
     await repo.upsert_stock_institutional(rows)
     rows_updated = [{"date": date(2026, 3, 28), "stock_id": "2330", "name": "Foreign_Dealer", "buy": 2000, "sell": 800}]
     await repo.upsert_stock_institutional(rows_updated)
-    result = await test_session.execute(select(TestStockInstitutional))
+    result = await test_session.execute(select(SqliteStockInstitutional))
     records = result.scalars().all()
     assert len(records) == 1
     assert records[0].buy == 2000
