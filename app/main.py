@@ -1,18 +1,28 @@
-"""
-TWSE API - FastAPI Application
-"""
+"""TWSE API — FastAPI Application"""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.db.connection import close_db, init_db
 from app.routers import chip
+from app.routers import margin
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+    await close_db()
+
 
 app = FastAPI(
     title="TWSE API",
-    description="REST API service for fetching TWSE (Taiwan Stock Exchange) chip data",
-    version="0.1.0",
+    description="REST API service for TWSE chip data with PostgreSQL caching",
+    version="0.2.0",
+    lifespan=lifespan,
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,17 +31,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(chip.router, prefix="/api/v1/chip", tags=["chip"])
+app.include_router(margin.router, prefix="/api/v1/margin", tags=["margin"])
 
 
 @app.get("/")
 async def root():
-    """Health check endpoint"""
     return {"status": "ok", "service": "twse-api"}
 
 
 @app.get("/health")
 async def health():
-    """Health check endpoint"""
     return {"status": "healthy"}
