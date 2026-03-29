@@ -2,7 +2,7 @@
 SQLAlchemy ORM models for TWSE chip data.
 Column naming follows FinMind dataset conventions for easy cross-reference.
 """
-from sqlalchemy import BigInteger, Column, Date, DateTime, Integer, String, UniqueConstraint
+from sqlalchemy import BigInteger, Column, Date, DateTime, Integer, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import func
 
@@ -95,3 +95,23 @@ class TotalMargin(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (UniqueConstraint("date", "name"),)
+
+
+class StockShareholding(Base):
+    """
+    個股外資持股比例 — FinMind: TaiwanStockShareholding
+    TWSE source: MI_QFIIS (selectType=ALLBUT0999)
+    """
+    __tablename__ = "twse_stock_shareholding"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False)
+    stock_id = Column(String(10), nullable=False)
+    NumberOfSharesIssued = Column(BigInteger, nullable=False, default=0)
+    ForeignInvestmentShares = Column(BigInteger, nullable=False, default=0)
+    ForeignInvestmentSharesRatio = Column(Numeric(10, 6), nullable=False, default=0.0)
+    ForeignInvestmentSharesWithoutDealers = Column(BigInteger, nullable=False, default=0)
+    ForeignInvestmentSharesWithoutDealersRatio = Column(Numeric(10, 6), nullable=False, default=0.0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (UniqueConstraint("date", "stock_id"),)

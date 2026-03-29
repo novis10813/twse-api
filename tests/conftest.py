@@ -3,7 +3,7 @@ Shared test fixtures.
 Uses aiosqlite in-memory DB with SQLite-compatible models.
 """
 import pytest
-from sqlalchemy import BigInteger, Column, Date, DateTime, Integer, String, UniqueConstraint
+from sqlalchemy import BigInteger, Column, Date, DateTime, Float, Integer, String, UniqueConstraint
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -69,6 +69,20 @@ class SqliteTotalMargin(SqliteBase):
     Return = Column(BigInteger, nullable=False, default=0)
     created_at = Column(DateTime)
     __table_args__ = (UniqueConstraint("date", "name"),)
+
+
+class SqliteStockShareholding(SqliteBase):
+    __tablename__ = "twse_stock_shareholding"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False)
+    stock_id = Column(String(10), nullable=False)
+    NumberOfSharesIssued = Column(BigInteger, nullable=False, default=0)
+    ForeignInvestmentShares = Column(BigInteger, nullable=False, default=0)
+    ForeignInvestmentSharesRatio = Column(Float, nullable=False, default=0.0)
+    ForeignInvestmentSharesWithoutDealers = Column(BigInteger, nullable=False, default=0)
+    ForeignInvestmentSharesWithoutDealersRatio = Column(Float, nullable=False, default=0.0)
+    created_at = Column(DateTime)
+    __table_args__ = (UniqueConstraint("date", "stock_id"),)
 
 
 @pytest.fixture
