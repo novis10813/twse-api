@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     postgres_port: int = 5432
     postgres_db: str = "twse_db"
 
+    # Data source adapter
+    data_source_adapter: str = "playwright"  # "playwright" | "finmind"
+
     @property
     def database_url(self) -> str:
         return (
