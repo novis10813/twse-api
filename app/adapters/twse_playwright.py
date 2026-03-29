@@ -10,7 +10,6 @@ TWSEPlaywrightClient: 實作 LendingSource / ShortSaleSource / DispositionSource
 import asyncio
 import logging
 import random
-from datetime import date as date_type
 from typing import Any, Optional
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
@@ -134,6 +133,7 @@ class TWSEPlaywrightClient(FormScraperBase):
         預設欄位順序（待確認）：
           [0] 證券代號  [1] 證券名稱  [2] 借券成交量  [3] 還券成交量  [4] 借券餘額
         """
+        from datetime import date as date_type
         d = date_type(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
         result = []
         for row in rows:
@@ -185,6 +185,7 @@ class TWSEPlaywrightClient(FormScraperBase):
         預設欄位順序（待確認）：
           [0] 證券代號  [1] 證券名稱  [2] 融券賣出  [3] 可融券上限
         """
+        from datetime import date as date_type
         d = date_type(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
         result = []
         for row in rows:
@@ -230,6 +231,7 @@ class TWSEPlaywrightClient(FormScraperBase):
         預設欄位順序（待確認）：
           [0] 處置起始日  [1] 處置終止日  [2] 證券代號  [3] 原因
         """
+        from datetime import date as date_type
 
         def _parse_date(s: str) -> date_type | None:
             s = s.strip().replace("/", "-")
