@@ -8,6 +8,7 @@ from app.db.connection import close_db, init_db
 from app.routers import chip
 from app.routers import margin
 from app.routers import shareholding
+from app.routers import lending
 
 
 @asynccontextmanager
@@ -35,6 +36,7 @@ app.add_middleware(
 app.include_router(chip.router, prefix="/api/v1/chip", tags=["chip"])
 app.include_router(margin.router, prefix="/api/v1/margin", tags=["margin"])
 app.include_router(shareholding.router, prefix="/api/v1/shareholding", tags=["shareholding"])
+app.include_router(lending.router, prefix="/api/v1/lending", tags=["lending"])
 
 
 @app.get("/")
