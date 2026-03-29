@@ -115,3 +115,55 @@ class StockShareholding(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (UniqueConstraint("date", "stock_id"),)
+
+
+class StockLending(Base):
+    """
+    個股借券成交明細 — FinMind: TaiwanStockSecuritiesLending
+    TWSE source: TWT49U
+    """
+    __tablename__ = "twse_stock_lending"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False)
+    stock_id = Column(String(10), nullable=False)
+    LendingShares = Column(BigInteger, nullable=False, default=0)
+    ReturningShares = Column(BigInteger, nullable=False, default=0)
+    LendingSharesBalance = Column(BigInteger, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (UniqueConstraint("date", "stock_id"),)
+
+
+class ShortSaleBalances(Base):
+    """
+    個股信用額度總量管制 — FinMind: TaiwanDailyShortSaleBalances
+    TWSE source: 信用額度總量管制頁面
+    """
+    __tablename__ = "twse_short_sale_balances"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False)
+    stock_id = Column(String(10), nullable=False)
+    ShortSaleShares = Column(BigInteger, nullable=False, default=0)
+    ShortSaleLimit = Column(BigInteger, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (UniqueConstraint("date", "stock_id"),)
+
+
+class Disposition(Base):
+    """
+    處置有價證券 — FinMind: TaiwanStockDispositionSecuritiesPeriod
+    TWSE source: 交易所公告頁面
+    """
+    __tablename__ = "twse_disposition"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)
+    stock_id = Column(String(10), nullable=False)
+    reason = Column(String(500), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (UniqueConstraint("start_date", "stock_id"),)

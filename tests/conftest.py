@@ -85,6 +85,40 @@ class SqliteStockShareholding(SqliteBase):
     __table_args__ = (UniqueConstraint("date", "stock_id"),)
 
 
+class SqliteStockLending(SqliteBase):
+    __tablename__ = "twse_stock_lending"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False)
+    stock_id = Column(String(10), nullable=False)
+    LendingShares = Column(BigInteger, nullable=False, default=0)
+    ReturningShares = Column(BigInteger, nullable=False, default=0)
+    LendingSharesBalance = Column(BigInteger, nullable=False, default=0)
+    created_at = Column(DateTime)
+    __table_args__ = (UniqueConstraint("date", "stock_id"),)
+
+
+class SqliteShortSaleBalances(SqliteBase):
+    __tablename__ = "twse_short_sale_balances"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False)
+    stock_id = Column(String(10), nullable=False)
+    ShortSaleShares = Column(BigInteger, nullable=False, default=0)
+    ShortSaleLimit = Column(BigInteger, nullable=False, default=0)
+    created_at = Column(DateTime)
+    __table_args__ = (UniqueConstraint("date", "stock_id"),)
+
+
+class SqliteDisposition(SqliteBase):
+    __tablename__ = "twse_disposition"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)
+    stock_id = Column(String(10), nullable=False)
+    reason = Column(String(500), nullable=True)
+    created_at = Column(DateTime)
+    __table_args__ = (UniqueConstraint("start_date", "stock_id"),)
+
+
 @pytest.fixture
 async def test_session():
     """In-memory SQLite session for tests."""
