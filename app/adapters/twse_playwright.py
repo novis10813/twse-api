@@ -206,6 +206,7 @@ class TWSEPlaywrightClient(FormScraperBase):
 
     async def fetch_disposition(self, date_str: str) -> list[dict]:
         """處置有價證券公告。"""
+        logger.debug("Fetching disposition for date: %s", date_str)
         async def _fetch():
             page = await self._new_page()
             try:
@@ -214,7 +215,6 @@ class TWSEPlaywrightClient(FormScraperBase):
                     "https://www.twse.com.tw/rwd/zh/announcement/punish",
                     wait_until="networkidle",
                 )
-                logger.debug("Fetching disposition for date: %s", date_str)
                 await asyncio.sleep(random.uniform(1.0, 2.0))
                 rows = await self._extract_table_rows(page)
                 return self._parse_disposition_rows(rows)
