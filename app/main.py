@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.connection import close_db, init_db
 from app.routers import chip
 from app.routers import margin
+from app.routers import shareholding
 
 
 @asynccontextmanager
@@ -19,7 +20,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="TWSE API",
     description="REST API service for TWSE chip data with PostgreSQL caching",
-    version="0.2.0",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
@@ -33,6 +34,7 @@ app.add_middleware(
 
 app.include_router(chip.router, prefix="/api/v1/chip", tags=["chip"])
 app.include_router(margin.router, prefix="/api/v1/margin", tags=["margin"])
+app.include_router(shareholding.router, prefix="/api/v1/shareholding", tags=["shareholding"])
 
 
 @app.get("/")
