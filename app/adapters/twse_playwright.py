@@ -10,6 +10,7 @@ TWSEPlaywrightClient: 實作 LendingSource / ShortSaleSource / DispositionSource
 import asyncio
 import logging
 import random
+from datetime import date as date_type
 from typing import Any, Optional
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
@@ -31,7 +32,7 @@ class FormScraperBase:
     """
 
     def __init__(self) -> None:
-        self._playwright = None
+        self._playwright: Any = None
         self._browser: Optional[Browser] = None
         self._context: Optional[BrowserContext] = None
 
@@ -67,21 +68,21 @@ class FormScraperBase:
     ) -> list[list[str]]:
         """
         用 JS 從頁面擷取 table 的所有 td 文字，回傳 list of row (list of cell strings)。
+        selector 作為參數傳入 evaluate，避免 JS injection。
         """
         rows: list[list[str]] = await page.evaluate(
-            f"""
-            () => {{
-                const table = document.querySelector('{table_selector}');
-                if (!table) return [];
-                return Array.from(table.querySelectorAll('tbody tr')).map(tr =>
-                    Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim())
-                );
-            }}
-            """
+            """(selector) => {
+            const table = document.querySelector(selector);
+            if (!table) return [];
+            return Array.from(table.querySelectorAll('tbody tr')).map(tr =>
+                Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim())
+            );
+        }""",
+            table_selector,
         )
         return rows
 
-    async def _retry(self, coro_fn, retries: int = _MAX_RETRIES, delay: float = 2.0) -> Any:
+    async def _retry(self, coro_fn: Any, retries: int = _MAX_RETRIES, delay: float = 2.0) -> Any:
         """重試 async callable，失敗時 exponential backoff。"""
         last_exc: Optional[Exception] = None
         for attempt in range(retries):
@@ -133,7 +134,6 @@ class TWSEPlaywrightClient(FormScraperBase):
         預設欄位順序（待確認）：
           [0] 證券代號  [1] 證券名稱  [2] 借券成交量  [3] 還券成交量  [4] 借券餘額
         """
-        from datetime import date as date_type
         d = date_type(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
         result = []
         for row in rows:
@@ -185,7 +185,6 @@ class TWSEPlaywrightClient(FormScraperBase):
         預設欄位順序（待確認）：
           [0] 證券代號  [1] 證券名稱  [2] 融券賣出  [3] 可融券上限
         """
-        from datetime import date as date_type
         d = date_type(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
         result = []
         for row in rows:
@@ -205,7 +204,7 @@ class TWSEPlaywrightClient(FormScraperBase):
     # ── 處置有價證券 ──────────────────────────────────────────────
 
     async def fetch_disposition(self, date_str: str) -> list[dict]:
-        """處置有價證券公告。"""
+        """處置有價證券公告。date_str 用於日誌記錄；TWSE 公告頁面不接受日期篩選。"""
         logger.debug("Fetching disposition for date: %s", date_str)
         async def _fetch():
             page = await self._new_page()
@@ -231,7 +230,6 @@ class TWSEPlaywrightClient(FormScraperBase):
         預設欄位順序（待確認）：
           [0] 處置起始日  [1] 處置終止日  [2] 證券代號  [3] 原因
         """
-        from datetime import date as date_type
 
         def _parse_date(s: str) -> date_type | None:
             s = s.strip().replace("/", "-")
@@ -260,6 +258,7 @@ _playwright_client: Optional[TWSEPlaywrightClient] = None
 
 
 def get_playwright_client() -> TWSEPlaywrightClient:
+    """Return the singleton TWSEPlaywrightClient. startup() must be called before use (done by FastAPI lifespan)."""
     global _playwright_client
     if _playwright_client is None:
         _playwright_client = TWSEPlaywrightClient()
