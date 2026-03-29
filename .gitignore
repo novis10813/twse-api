@@ -33,3 +33,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Git worktrees
+.worktrees/
