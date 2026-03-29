@@ -63,6 +63,11 @@ class TWSEClient:
         url = f"{BASE_URL}/rwd/zh/marginTrading/MI_MARGN?response=json&date={date_str}&selectType=ALL"
         return await self._fetch_json(url)
 
+    async def fetch_shareholding_data(self, date_str: str) -> dict[str, Any]:
+        """MI_QFIIS — 外資持股比例 (selectType=ALLBUT0999 excludes ETF/fund codes)"""
+        url = f"{BASE_URL}/rwd/zh/fund/MI_QFIIS?response=json&date={date_str}&selectType=ALLBUT0999"
+        return await self._fetch_json(url)
+
 
 _client: Optional[TWSEClient] = None
 
