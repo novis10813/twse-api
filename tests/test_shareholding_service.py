@@ -59,3 +59,17 @@ async def test_get_stock_shareholding_history_empty_before_ingest(test_session: 
 
     result = await service.get_stock_shareholding_history("2330", "20260101", "20260328")
     assert result == []
+
+
+async def test_get_all_stocks_shareholding_calls_client_on_miss(test_session: AsyncSession):
+    """DB miss → client called, returns all stocks for that date."""
+    client = _mock_client_with_data()
+    service = ShareholdingService(session=test_session, client=client)
+
+    result = await service.get_all_stocks_shareholding("20260328")
+
+    client.fetch_shareholding_data.assert_called_once_with("20260328")
+    assert result["date"] == "20260328"
+    assert len(result["stocks"]) == 1
+    assert result["stocks"][0]["stock_id"] == "2330"
+    assert result["stocks"][0]["ForeignInvestmentSharesRatio"] == 57.84
