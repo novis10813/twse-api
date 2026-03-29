@@ -38,8 +38,9 @@ class FormScraperBase:
     async def startup(self) -> None:
         """啟動 Playwright + Chromium。由 FastAPI lifespan 呼叫。"""
         self._playwright = await async_playwright().start()
-        self._browser = await self._playwright.chromium.launch(headless=True)
-        self._context = await self._browser.new_context(
+        browser = await self._playwright.chromium.launch(headless=True)
+        self._browser = browser
+        self._context = await browser.new_context(
             user_agent=_DEFAULT_USER_AGENT,
             viewport={"width": 1280, "height": 800},
         )
@@ -213,6 +214,7 @@ class TWSEPlaywrightClient(FormScraperBase):
                     "https://www.twse.com.tw/rwd/zh/announcement/punish",
                     wait_until="networkidle",
                 )
+                logger.debug("Fetching disposition for date: %s", date_str)
                 await asyncio.sleep(random.uniform(1.0, 2.0))
                 rows = await self._extract_table_rows(page)
                 return self._parse_disposition_rows(rows)
