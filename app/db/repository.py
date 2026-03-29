@@ -11,6 +11,7 @@ from app.db.models import (
     TotalInstitutionalInvestors,
     StockMargin,
     TotalMargin,
+    StockShareholding,
 )
 
 logger = logging.getLogger(__name__)
@@ -188,5 +189,69 @@ class TWSERepository:
         d = _parse_date(date_str)
         result = await self.session.execute(
             select(TotalMargin).where(TotalMargin.date == d)
+        )
+        return list(result.scalars().all())
+
+    # ── 個股外資持股 ──────────────────────────────────────────────
+
+    async def upsert_stock_shareholding(self, rows: list[dict]) -> None:
+        """Upsert rows into twse_stock_shareholding."""
+        fields = [
+            "NumberOfSharesIssued",
+            "ForeignInvestmentShares",
+            "ForeignInvestmentSharesRatio",
+            "ForeignInvestmentSharesWithoutDealers",
+            "ForeignInvestmentSharesWithoutDealersRatio",
+        ]
+        for row in rows:
+            d = row["date"] if isinstance(row["date"], date_type) else _parse_date(str(row["date"]))
+            existing = await self.session.execute(
+                select(StockShareholding).where(
+                    StockShareholding.date == d,
+                    StockShareholding.stock_id == row["stock_id"],
+                )
+            )
+            record = existing.scalar_one_or_none()
+            if record:
+                for f in fields:
+                    if f in row:
+                        setattr(record, f, row[f])
+            else:
+                kwargs = {"date": d, "stock_id": row["stock_id"]}
+                for f in fields:
+                    kwargs[f] = row.get(f, 0)
+                self.session.add(StockShareholding(**kwargs))
+        await self.session.flush()
+
+    async def get_stock_shareholding(
+        self, date_str: str, stock_id: str
+    ) -> Optional[StockShareholding]:
+        d = _parse_date(date_str)
+        result = await self.session.execute(
+            select(StockShareholding).where(
+                StockShareholding.date == d,
+                StockShareholding.stock_id == stock_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_all_stocks_shareholding(self, date_str: str) -> list[StockShareholding]:
+        d = _parse_date(date_str)
+        result = await self.session.execute(
+            select(StockShareholding).where(StockShareholding.date == d)
+        )
+        return list(result.scalars().all())
+
+    async def get_stock_shareholding_history(
+        self, stock_id: str, start_date: str, end_date: str
+    ) -> list[StockShareholding]:
+        start = _parse_date(start_date)
+        end = _parse_date(end_date)
+        result = await self.session.execute(
+            select(StockShareholding).where(
+                StockShareholding.stock_id == stock_id,
+                StockShareholding.date >= start,
+                StockShareholding.date <= end,
+            ).order_by(StockShareholding.date)
         )
         return list(result.scalars().all())
