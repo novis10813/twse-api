@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.adapters.twse_playwright import get_playwright_client
 from app.db.connection import close_db, init_db
 from app.routers import chip
 from app.routers import margin
@@ -16,14 +17,16 @@ from app.routers import disposition
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    await get_playwright_client().startup()
     yield
+    await get_playwright_client().shutdown()
     await close_db()
 
 
 app = FastAPI(
     title="TWSE API",
     description="REST API service for TWSE chip data with PostgreSQL caching",
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 
