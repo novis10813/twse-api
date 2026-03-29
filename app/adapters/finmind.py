@@ -15,13 +15,13 @@ class FinMindClient:
         self.token = token
 
     async def fetch_securities_lending(self, date_str: str) -> list[dict]:
-        raise NotImplementedError("FinMind adapter not yet implemented")
+        raise NotImplementedError(f"FinMind adapter not yet implemented (date={date_str})")
 
     async def fetch_short_sale_balances(self, date_str: str) -> list[dict]:
-        raise NotImplementedError("FinMind adapter not yet implemented")
+        raise NotImplementedError(f"FinMind adapter not yet implemented (date={date_str})")
 
     async def fetch_disposition(self, date_str: str) -> list[dict]:
-        raise NotImplementedError("FinMind adapter not yet implemented")
+        raise NotImplementedError(f"FinMind adapter not yet implemented (date={date_str})")
 
 
 _finmind_client: Optional[FinMindClient] = None
