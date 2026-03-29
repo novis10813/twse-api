@@ -43,6 +43,7 @@ async def test_get_stock_lending_returns_db_on_hit(test_session: AsyncSession):
 
     result = await service.get_stock_lending("20260328", "2330")
     adapter.fetch_securities_lending.assert_not_called()
+    assert result is not None
     assert result["LendingSharesBalance"] == 50000
 
 
